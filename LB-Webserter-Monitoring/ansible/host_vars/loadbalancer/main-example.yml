@@ -1,0 +1,31 @@
+nginx:
+  config_path: /etc/nginx/
+  port: 80
+  private_ip_1: "{{ lookup('ansible.builtin.file', '{{ dir.datapass }}/private_ip_1')}}"
+  private_ip_2: "{{ lookup('ansible.builtin.file', '{{ dir.datapass }}/private_ip_2')}}"
+  private_ip_3: "{{ lookup('ansible.builtin.file', '{{ dir.datapass }}/private_ip_3')}}"
+
+prometheus:
+  dir: /home/{{ ansible_user }}/prometheus
+  url: 'https://github.com/prometheus/prometheus/releases/download/v2.47.2/prometheus-2.47.2.linux-amd64.tar.gz'
+  version: 'prometheus-2.47.2.linux-amd64'
+  bin: '/usr/local/bin/prometheus'
+
+alertmanager:
+  dir: /home/{{ ansible_user }}/alertmanager
+  url: 'https://github.com/prometheus/alertmanager/releases/download/v0.26.0/alertmanager-0.26.0.linux-amd64.tar.gz'
+  version: 'alertmanager-0.26.0.linux-amd64'
+  bin: '/usr/local/bin/alertmanager'
+  targets:
+    - "{{lookup('ansible.builtin.file', '{{ dir.datapass }}/private_ip_1')}}:9100"
+    - "{{lookup('ansible.builtin.file', '{{ dir.datapass }}/private_ip_2')}}:9100"
+    - "{{lookup('ansible.builtin.file', '{{ dir.datapass }}/private_ip_3')}}:9100"
+
+aws:
+  region: 'eu-central-1'
+  access_key: ""
+  secret_key: ""
+  session_token: ""
+
+  sns_api : 'https://sns.eu-central-1.amazonaws.com'
+  sns_topic_arn: "{{lookup('ansible.builtin.file', '{{dir.datapass}}/sns_topic_arn')}}"
