@@ -1,0 +1,6 @@
+---
+- name: NodeJsApp Service aktivieren
+  systemd:
+    name: nodejsapp 
+    state: started
+    enabled: true

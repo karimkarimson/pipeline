@@ -1,0 +1,75 @@
+---
+- ansible.builtin.apt:
+    name: "*"
+    state: latest
+
+- name: Retrieve the list of home directories
+  ansible.builtin.command: "ls {{ alertmanager.dir }}"
+  register: app_dir
+  ignore_errors: true
+
+- name: create alertmanager directory
+  ansible.builtin.file:
+    path: '{{ alertmanager.dir }}'
+    owner: ubuntu
+    group: ubuntu
+    state: directory
+  when: app_dir.rc != 0
+
+- name: Download Alertmanager
+  ansible.builtin.get_url:
+    url: '{{ alertmanager.url }}'
+    dest: '{{ alertmanager.dir }}'
+  when: app_dir.rc != 0
+
+- name: Unpack packages
+  ansible.builtin.shell: 'sudo tar -xvf {{ alertmanager.dir }}/{{ alertmanager.version }}.tar.gz'
+  when: app_dir.rc != 0
+
+- name: move files
+  copy:
+    src: "/home/ubuntu/{{ alertmanager.version }}/"
+    dest: "{{ alertmanager.bin }}"
+    remote_src: yes
+  when: app_dir.rc != 0
+  
+- name: create configuration file
+  template:
+    src: templates/alertmanager.yaml.j2
+    dest: "{{ alertmanager.bin }}/alertmanager.yml"
+    owner: ubuntu
+    group: ubuntu
+    mode: 0644
+  notify: Restart Alertmanager
+
+- name: create environment file
+  copy:
+    dest: "{{ alertmanager.bin }}/alertmanager.env"
+    content: |
+      AWS_ACCESS_KEY_ID="{{ aws.access_key }}"
+      AWS_SECRET_ACCESS_KEY="{{ aws.secret_key }}"
+      AWS_SESSION_TOKEN="{{ aws.session_token }}"
+  notify: Restart Alertmanager
+
+- name: create service file
+  copy:
+    dest: "/etc/systemd/system/alertmanager.service"
+    content: |
+      [Unit]
+      Description=Alertmanager Service
+      After=network.target
+
+      [Service]
+      Type=simple
+      ExecStart=/usr/local/bin/alertmanager/alertmanager --config.file="/usr/local/bin/alertmanager/alertmanager.yml" 
+      EnvironmentFile=/usr/local/bin/alertmanager/alertmanager.env
+
+      [Install]
+      WantedBy=multi-user.target
+
+
+- name: Altermanager Service always started
+  systemd:
+    name: alertmanager 
+    state: started
+    enabled: true

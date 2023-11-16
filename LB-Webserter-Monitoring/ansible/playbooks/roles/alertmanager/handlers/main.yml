@@ -1,0 +1,5 @@
+- name: Restart Alertmanager
+  service:
+    name: alertmanager
+    state: restarted
+    daemon_reload: yes

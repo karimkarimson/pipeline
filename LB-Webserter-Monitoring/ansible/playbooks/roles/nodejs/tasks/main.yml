@@ -1,0 +1,48 @@
+---
+- name: Installieren von Node.js
+  apt:
+    name: nodejs
+    state: present
+    update_cache: yes
+
+- name: Installieren von npm
+  apt:
+    name: npm
+    state: present
+
+- name: Retrieve the list of home directories
+  ansible.builtin.command: "ls {{ path_to_app_directory }}"
+  register: app_dir
+  ignore_errors: true
+
+- name: Kopieren der App-Dateien
+  copy:
+    src: files/app/
+    dest: "{{ path_to_app_directory }}"
+  when: app_dir.rc != 0
+
+- name: Installieren von App-Abhängigkeiten
+  npm:
+    path: "{{ path_to_app_directory }}"
+  when: app_dir.rc != 0
+
+- name: Erstelle NodeJsApp Service Datei
+  copy:
+    dest: "/etc/systemd/system/nodejsapp.service"
+    content: |
+      [Unit]
+      Description=NodeJsApp Service
+      After=network.target
+
+      [Service]
+      Type=simple
+      ExecStart=/usr/bin/node {{ path_to_app_directory }}/app.js
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: NodeJsApp Service aktivieren
+  systemd:
+    name: nodejsapp 
+    state: started
+    enabled: true

@@ -1,0 +1,5 @@
+- name: Restart NodeJsApp
+  service:
+    name: nodejsapp
+    state: restarted
+    daemon_reload: yes

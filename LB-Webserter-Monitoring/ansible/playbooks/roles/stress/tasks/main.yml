@@ -1,0 +1,14 @@
+---
+- name: Update all packages
+  ansible.builtin.apt:
+    name: "*"
+    state: latest
+
+- name: Install Stress 
+  ansible.builtin.apt:
+    name: stress
+    state: latest
+
+# - name: Stress CPU
+#   ansible.builtin.shell: 'stress --cpu {{ stress.cpu }} --timeout {{ stress.timeout }}'
+#   register: stress_cpu_result

@@ -1,0 +1,23 @@
+---
+- name: Installation von Nginx
+  apt:
+    name: nginx
+    state: present
+    update_cache: yes
+
+- name: Kopieren der Nginx-Konfigurationsdatei für Load Balancing
+  template:
+    src: templates/nginx.yml.j2
+    dest: "{{ nginx.config_path }}/nginx.conf"
+  notify:
+  - Restart Nginx
+
+- name: Entfernen der Standard-Nginx-Konfiguration
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: Stelle sicher, dass Nginx läuft
+  service:
+    name: nginx
+    state: started

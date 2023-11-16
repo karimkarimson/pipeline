@@ -1,0 +1,84 @@
+---
+- name: Update all packages
+  ansible.builtin.apt:
+    name: "*"
+    state: latest
+
+- name: Retrieve the list of home directories
+  ansible.builtin.command: "ls {{ prometheus.dir }}"
+  register: app_dir
+  ignore_errors: true
+
+- name: create directory
+  file:
+    path: "{{ prometheus.dir }}"
+    state: directory
+  when: app_dir.rc != 0
+
+- name: download prometheus
+  get_url:
+    url: "{{ prometheus.url }}"
+    dest: "{{ prometheus.dir }}/{{ prometheus.version }}.tar.gz"
+  when: app_dir.rc != 0
+
+- name: unpack installation files
+  unarchive:
+    src: "{{ prometheus.dir }}/{{ prometheus.version }}.tar.gz"
+    dest: "{{ prometheus.dir }}"
+    remote_src: yes
+  when: app_dir.rc != 0
+
+- name: move files
+  copy:
+    src: "{{ prometheus.dir }}/{{ prometheus.version }}/"
+    dest: "{{ prometheus.bin }}"
+    remote_src: yes
+  when: app_dir.rc != 0
+
+- name: Copy from local prom_rules.yml
+  ansible.builtin.copy:
+    src: files/alert_prom_rules.yaml
+    dest: "{{ prometheus.bin }}/prom_rules.yml"
+  notify: Restart Prometheus
+
+- name: Copy from local alert_node_exporter.yml
+  ansible.builtin.copy:
+    src: files/alert_node_exporter.yml
+    dest: "{{ prometheus.bin }}/node_exporter.yml"
+  notify: Restart Prometheus
+
+- name: create config file
+  template:
+    src: templates/exporter.yaml.j2
+    dest: "{{ prometheus.bin }}/exporter.yml"
+  notify: Restart Prometheus
+
+- name: "Read a file content"
+  shell: |
+    cat /usr/local/bin/prometheus/exporter.yml
+  register: file_content
+
+- name: "Print exporter.yml content to console"
+  debug:
+    msg: "{{ file_content.stdout }}"
+
+- name: create service file
+  copy:
+    dest: "/etc/systemd/system/prometheus.service"
+    content: |
+      [Unit]
+      Description=Prometheus Service
+      After=network.target
+
+      [Service]
+      Type=simple
+      ExecStart=/usr/local/bin/prometheus/prometheus --config.file=/usr/local/bin/prometheus/exporter.yml
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: service always started
+  systemd:
+    name: prometheus
+    state: started
+    enabled: true

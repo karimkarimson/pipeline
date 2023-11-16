@@ -1,0 +1,6 @@
+---
+- name: Start der App-Server
+  hosts: app_servers
+  become: true
+  roles:
+    - start_servers
