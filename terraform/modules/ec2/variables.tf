@@ -40,3 +40,6 @@ variable "vpc_cidr" {
 variable "vpc_id" {
   type = string
 }
+variable "ec2_tags" {
+  type = map(string)
+}

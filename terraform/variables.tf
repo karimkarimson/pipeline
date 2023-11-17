@@ -17,6 +17,9 @@ variable "map_public_ip_on_launch" {
 variable "tags" {
   type = map(string)
 }
+variable "subnet_name" {
+  type = map(string)
+}
 
 # Variables for AWS EC2
 variable "region" {
@@ -46,14 +49,14 @@ variable "instance_count" {
 variable "key_path" {
   type = string
 }
+variable "ec2_tags" {
+  type = map(string)
+}
 
 # Variables for AWS SNS
 variable "email" {
   type = string
 }
-
-
-#* cidr blocks Security Group Refactor
-# variable "cidrs_vpc" {
-#   type = list(string)
-# }
+variable "sns_topic_name" {
+  type = string
+}

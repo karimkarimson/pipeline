@@ -1,0 +1,4 @@
+path_to_app_directory: "/home/{{ ansible_user }}/app"
+stress:
+  cpu: 1
+  timeout: 600

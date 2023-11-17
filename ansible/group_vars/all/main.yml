@@ -1,0 +1,15 @@
+ansible_user: ubuntu
+ansible_ssh_private_key_file: ///.ssh/your_private_key # fill in to your ssh-private-key file, that it's public key pair is registered with aws
+ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+
+dir:
+  root: /    # fill in the absolute path to the project directory
+  ansible: /{{ dir.root }}/ansible
+  terraform: /{{ dir.root }}/terraform
+  datapass: /{{ dir.terraform }}/datapass
+
+nodex:
+  dir: /home/{{ ansible_user }}/node_exporter
+  url: 'https://github.com/prometheus/node_exporter/releases/download/v1.6.1/node_exporter-1.6.1.linux-amd64.tar.gz'
+  version: 'node_exporter-1.6.1.linux-amd64'
+  bin: '/usr/local/bin/node_exporter'

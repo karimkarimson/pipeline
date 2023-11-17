@@ -8,7 +8,5 @@ resource "aws_subnet" "my_subnet" {
   #TODO: Jumphost Config
   # map_public_ip_on_launch = count.index > 0 ? false : true
 
-  tags = {
-    Name = "TF Subnet ${count.index}"
-  }
+  tags = var.subnet_name
 }

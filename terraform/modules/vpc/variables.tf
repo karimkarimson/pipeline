@@ -28,3 +28,8 @@ variable "tags" {
   description = "A map of tags to add to all resources"
   type        = map(string)
 }
+
+variable "subnet_name" {
+  description = "A map of tags to add to all resources"
+  type        = map(string)
+}

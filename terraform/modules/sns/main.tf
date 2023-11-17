@@ -1,5 +1,5 @@
 resource "aws_sns_topic" "alertingnotes" {
-  name = "alertingnotes"
+  name = var.sns_topic_name
 }
 
 resource "aws_sns_topic_subscription" "triggered_alarm" {

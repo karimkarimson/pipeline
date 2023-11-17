@@ -8,12 +8,13 @@ module "vpc" {
   availability_zones      = var.availability_zones
   map_public_ip_on_launch = var.map_public_ip_on_launch
   tags                    = var.tags
+  subnet_name = var.subnet_name
 }
 module "ec2" {
   source     = "./modules/ec2"
   depends_on = [module.vpc]
 
-  instance_count = var.instance_count
+  instance_count = length(var.subnets_cidr)
   key_name       = var.key_name
   profile_name   = var.aws_profile
 
@@ -28,21 +29,12 @@ module "ec2" {
   # Depends on VPC
   subnet_id = module.vpc.subnet_id
   vpc_id    = module.vpc.vpc_id
+  ec2_tags = var.ec2_tags
 }
-
-#! currently not needed
-# module "ansible" {
-#   source     = "./modules/ansible"
-#   depends_on = [module.ec2]
-
-#   # Variables
-#   key_path    = var.key_path
-#   public_ips  = module.ec2.instance_ip
-#   private_ips = module.ec2.instance_private_ip
-# }
 
 module "sns_module" {
   source = "./modules/sns"
 
   email = var.email
+  sns_topic_name = var.sns_topic_name
 }

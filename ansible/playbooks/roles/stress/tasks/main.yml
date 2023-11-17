@@ -1,0 +1,10 @@
+---
+- name: Update all packages
+  ansible.builtin.apt:
+    name: "*"
+    state: latest
+
+- name: Install Stress 
+  ansible.builtin.apt:
+    name: stress
+    state: latest

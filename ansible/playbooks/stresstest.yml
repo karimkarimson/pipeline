@@ -1,0 +1,7 @@
+---
+- name: Testen der App-Server
+  hosts: app_servers
+  become: true
+  roles:
+    - stresstest
+
